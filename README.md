@@ -39,4 +39,4 @@ For more information, feel free to contact the project maintainers:
 - **Name:** Shengwei Peng
 - **Email:** m11151033@mail.ntust.edu.tw
 
-Thank you for your interest in the Classical Chinese Translation project!
+Thank you for your interest in the Chinese Multimodal Sentiment Analysis project!
