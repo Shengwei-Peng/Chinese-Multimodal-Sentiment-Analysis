@@ -32,11 +32,5 @@ We welcome contributions to the Chinese-Multimodal-Sentiment-Analysis repository
 
 This repository builds upon the work and findings of various research papers and datasets, including the CH-SIMS dataset and associated research. We thank all the contributors and researchers in the field for their valuable insights and contributions.
 
-## Contact
-
-For more information, feel free to contact the project maintainers:
-
-- **Name:** Shengwei Peng
-- **Email:** m11151033@mail.ntust.edu.tw
 
 Thank you for your interest in the Chinese Multimodal Sentiment Analysis project!
