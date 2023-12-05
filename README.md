@@ -21,7 +21,7 @@ pip install -r requirements.txt
 ## Usage
 
 ```python
-pass
+python3 main.py
 ```
 
 ## Contributing
