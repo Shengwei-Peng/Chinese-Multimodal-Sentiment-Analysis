@@ -1,15 +1,36 @@
 import torch
 from argparse import ArgumentParser
-from utils import format_CH_SIMS, extracted_features
+from utils import format_CH_SIMS, extracted_features, split_data, Train, validation, visualization
+from model import Feature_Fusion_Network
 
 def parse_args():
 
     parser = ArgumentParser()
     parser.add_argument(
-        "--data_path", 
+        "--processed_data", 
         type=str, 
         default=None,
         help="If you already have processed data (.pt, .pth), you can load it directly and skip the pre-processing steps."
+    )
+    parser.add_argument(
+        "--batch_size", 
+        type=int, 
+        default=1,
+    )
+    parser.add_argument(
+        "--lr", 
+        type=float, 
+        default=1e-4,
+    )
+    parser.add_argument(
+        "--eposhs", 
+        type=int, 
+        default=1,
+    )
+    parser.add_argument(
+        "--model_save_to", 
+        type=str, 
+        default="./",
     )
     args = parser.parse_args()
     
@@ -20,8 +41,8 @@ def main():
     torch.cuda.empty_cache()
     args = parse_args()
 
-    if args.data_path:
-        data = torch.load(args.data_path)
+    if args.processed_data:
+        data = torch.load(args.processed_data)
     else:
         format_CH_SIMS()
         data = extracted_features(
@@ -31,6 +52,23 @@ def main():
             vision_model="microsoft/xclip-base-patch32",
             data_save_to="processed_data.pt"
             )
+
+    train_loader, valid_loader, test_loader = split_data(data=data, batch_size=args.batch_size)
+
+    model = Feature_Fusion_Network(
+        t_in=data["train"]["text"][0].shape, 
+        a_in=data["train"]["audio"][0].shape, 
+        v_in=data["train"]["vision"][0].shape, 
+        num_classes=max(data["train"]["label"])+1,
+        )
+    
+    model, history = Train(model, train_loader, valid_loader, args.lr, args.eposhs, args.model_save_to)
+
+    model = torch.load(f"{args.model_save_to}/best.pth")
+
+    _, _, pred, true = validation(model, test_loader)
+
+    visualization(history, pred, true)
 
 if __name__ == "__main__":
     main()
