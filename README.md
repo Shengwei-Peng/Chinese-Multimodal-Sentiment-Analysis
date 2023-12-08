@@ -21,7 +21,10 @@ pip install -r requirements.txt
 ## Usage
 
 ```python
-python3 main.py
+python3 main.py \
+  --batch_size 64 \
+  --lr 5e-5 \
+  --eposhs 100
 ```
 
 ## Result
