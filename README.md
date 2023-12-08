@@ -29,7 +29,7 @@ python3 main.py \
 
 ## Result
 
-- SIMS
+- CH-SIMS
 
 | Model |Has0_acc_2 |Has0_F1_score |Non0_acc_2 |Non0_F1_score |Acc_3 |F1_score_3 |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
