@@ -41,7 +41,7 @@ python3 main.py
 | mlf_dnn |80.79 |80.59 |58.19 |55.55 |70.37 |65.94 |
 | mtfn |81.23 |81.24 |56.91 |55.29 |70.28 |66.44 |
 | mlmf |81.45 |81.62 |56.60 |55.66 |71.60 |70.45 |
-| Ours |  |  |  |  |72.87 |71.03 |
+|**Ours** |  |  |  |  |**72.87** |**71.03** |
 ## Contributing
 
 We welcome contributions to the Chinese-Multimodal-Sentiment-Analysis repository. If you have suggestions, bug reports, or want to contribute code or documentation, please submit a pull request or open an issue.
