@@ -27,9 +27,26 @@ python3 main.py \
   --eposhs 100
 ```
 
-## Result
+## CH-SIMS Result
 
-- CH-SIMS
+- Regression
+
+| Model |Mult_acc_2 |Mult_acc_3 |Mult_acc_5 |F1_score |MAE |Corr | Data Setting |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| ef_lstm |69.37 |54.27 |21.23 |56.82 |59.07 |5.45 | Unaligned |
+| lf_dnn |77.02 |64.33 |39.74 |77.27 |44.63 |55.51 | Unaligned |
+| tfn |78.38 |65.12 |39.3 |78.62 |43.22 |59.1 | Unaligned |
+| lmf |77.77 |64.68 |40.53 |77.88 |44.12 |57.59 | Unaligned |
+| mfn |77.9 |65.73 |39.47 |77.88 |43.49 |58.24 | Unaligned |
+| graph_mfn |78.77 |65.65 |39.82 |78.21 |44.5 |57.84 | Unaligned |
+| mult |78.56 |64.77 |37.94 |79.66 |45.32 |56.41 | Unaligned |
+| mlf_dnn |80.44 |69.37 |40.22 |80.28 |39.58 |66.52 | Unaligned |
+| mtfn |81.09 |68.80 |40.31 |81.01 |39.54 |66.58 | Unaligned |
+| mlmf |79.34 |68.36 |41.05 |79.07 |40.91 |63.90 | Unaligned |
+| self_mm |80.04 |65.47 |41.53 |80.44 |42.50 |59.52 | Unaligned |
+|**Ours** |  |  |  |  | | |
+
+- Classification
 
 | Model |Has0_acc_2 |Has0_F1_score |Non0_acc_2 |Non0_F1_score |Acc_3 |F1_score_3 |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
