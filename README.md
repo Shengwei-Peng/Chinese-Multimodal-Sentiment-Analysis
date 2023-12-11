@@ -24,7 +24,10 @@ pip install -r requirements.txt
 python3 main.py \
   --batch_size 64 \
   --lr 5e-5 \
-  --eposhs 100
+  --eposhs 100 \
+  --early_stop 20 \
+  --model_save_to ./model \
+  --regression
 ```
 
 ## CH-SIMS Result
