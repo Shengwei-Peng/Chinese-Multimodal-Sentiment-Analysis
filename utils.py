@@ -1,5 +1,6 @@
 import os
 import av
+import json
 import torch
 import librosa
 import numpy as np
@@ -15,7 +16,7 @@ from torch.utils.data import Dataset, DataLoader
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from moviepy.editor import AudioFileClip, VideoFileClip
 from transformers import AutoTokenizer, AutoProcessor, AutoModel
-from sklearn.metrics import confusion_matrix, classification_report, accuracy_score, f1_score
+from sklearn.metrics import confusion_matrix, classification_report, accuracy_score, f1_score, mean_absolute_error, matthews_corrcoef
 
 def format_CH_SIMS():
 
@@ -23,7 +24,7 @@ def format_CH_SIMS():
     
     for mode in ["train", "valid", "test"]:
     
-        labels = {}
+        labels = []
         path = f"./formatted/{mode}"
         label = raw_label[raw_label['mode']==mode]
         os.makedirs(path, exist_ok=True)
@@ -33,9 +34,13 @@ def format_CH_SIMS():
                 os.mkdir(f"{path}/{label.loc[i]['video']}")
             
             index = f"{label.loc[i]['video']}/{label.loc[i]['id']:0>4d}"
-            labels[index] = label.loc[i]['label']
+            labels += [{
+                "id": index,
+                "C":  label.loc[i]['label'],
+                "R": label.loc[i]['M']
+            }]
             
-            with open(f"{path}/{index}.txt", 'w', encoding='UTF-8') as f:
+            with open(f"{path}/{index}.txt", 'w', encoding="utf-8") as f:
                 f.write(label.loc[i]['text'])
                 
             audio = AudioFileClip(f"./CH-SIMS/Raw/{index}.mp4")
@@ -44,7 +49,8 @@ def format_CH_SIMS():
             video = VideoFileClip(f"./CH-SIMS/Raw/{index}.mp4")
             video.write_videofile(f"{path}/{index}.mp4")
 
-        pd.DataFrame(list(labels.items())).to_csv(f"{path}/label.csv", index=False, header=False)
+        with open(f"{path}/label.json", 'w', encoding="utf-8") as file:
+            json.dump(labels, file, indent=4)
 
 
 def sample_frame_indices(clip_len, frame_sample_rate, seg_len):
@@ -115,13 +121,13 @@ def Vision(path, imageprocessor, model):
 
 
 def extracted_features(
-        data_path: str,
         text_model: str=None,
         audio_model: str=None,
         vision_model: str=None,
         data_save_to: str=None,
         ) -> dict():
-    
+
+    format_CH_SIMS()
     device = torch.device('cuda' if torch.cuda.is_available else 'cpu')
     encoder = {"Negative":0, "Neutral":1, "Positive":2}
     data = {}
@@ -136,14 +142,15 @@ def extracted_features(
         processor_vision = AutoProcessor.from_pretrained(vision_model)
         model_vision = AutoModel.from_pretrained(vision_model).to(device)
     
-    for mode in os.listdir(data_path):
+    for mode in os.listdir("./formatted"):
 
         data[mode] = {}
-        labels = pd.read_csv(f"{data_path}/{mode}/label.csv", names=["id", "label"])
+        with open(f"./formatted/{mode}/label.json", "r", encoding="utf-8") as file:
+            label = json.load(file)
         first = True
         
-        for i in tqdm(range(len(labels)), desc=f"{mode}", unit_scale=True, colour="green"):
-            path = f"{data_path}/{mode}/{labels['id'][i]}"
+        for i in tqdm(range(len(label)), desc=f"{mode}", unit_scale=True, colour="green"):
+            path = f"./formatted/{mode}/{label[i]['id']}"
 
             if first :
                 first = False
@@ -153,7 +160,8 @@ def extracted_features(
                     data_audio = Audio(path, processor_audio, model_audio)
                 if vision_model: 
                     data_vision = Vision(path, processor_vision, model_vision)
-                label = np.array([encoder[labels["label"][i]]])
+                label_c = np.array([encoder[label[i]["C"]]])
+                label_r = np.array([label[i]["R"]])
             else:
                 if text_model: 
                     data_text = np.append(data_text, Text(path, tokenizer, model_text), axis=0)
@@ -161,15 +169,16 @@ def extracted_features(
                     data_audio = np.append(data_audio, Audio(path, processor_audio, model_audio), axis=0)
                 if vision_model: 
                     data_vision = np.append(data_vision, Vision(path, processor_vision, model_vision), axis=0)
-                label = np.append(label, encoder[labels["label"][i]])
-
+                label_c = np.append(label_c, encoder[label[i]["C"]])
+                label_r = np.append(label_r, label[i]["R"])
         if text_model: 
             data[mode]["text"] = data_text
         if audio_model: 
             data[mode]["audio"] = data_audio
         if vision_model: 
             data[mode]["vision"] = data_vision
-        data[mode]["label"] = label
+        data[mode]["label_c"] = label_c
+        data[mode]["label_r"] = label_r
 
     if data_save_to:
         torch.save(data, data_save_to, pickle_protocol=4)
@@ -182,10 +191,11 @@ class dataset(Dataset):
         self.text = FloatTensor(data[mode]["text"])
         self.audio = FloatTensor(data[mode]["audio"])
         self.vision = FloatTensor(data[mode]["vision"])
-        self.label = LongTensor(data[mode]["label"])
-        
+        self.label_r = FloatTensor(data[mode]["label_r"])
+        self.label_c = LongTensor(data[mode]["label_c"])
+
     def __len__(self):
-        return len(self.label)
+        return len(self.label_c)
     
     def __getitem__(self, index):
 
@@ -194,7 +204,10 @@ class dataset(Dataset):
             'audio': self.audio[index],
             'vision': self.vision[index],
         }
-        label = self.label[index]
+        label = {
+            "c": self.label_c[index],
+            "r": self.label_r[index],
+        }
         
         return data, label
 
@@ -220,156 +233,146 @@ class EarlyStopping:
         self.patience = patience
         self.verbose = verbose
         self.counter = 0
-        self.best_score = None
+        self.best_score = -1
         self.early_stop = False
-        self.val_acc_max= 0
+
         os.makedirs(save_path, exist_ok=True)
 
-    def __call__(self, val_acc, model):
+    def __call__(self, score, model):
 
-        score = val_acc
-
-        if self.best_score is None:
+        if score >= self.best_score:
+            self.save_checkpoint(score, model)
             self.best_score = score
-            self.save_checkpoint(val_acc, model)
-        elif score <= self.best_score:
+            self.counter = 0
+
+        else :
             self.counter += 1
             print(f'EarlyStopping counter: {self.counter} out of {self.patience}')
             if self.counter >= self.patience:
                 self.early_stop = True
                 print("Early stopping!")
-        else:
-            self.best_score = score
-            self.save_checkpoint(val_acc, model)
-            self.counter = 0
 
-    def save_checkpoint(self, val_acc, model):
+    def save_checkpoint(self, score, model):
         '''Saves model when validation loss decrease.'''
         if self.verbose:
-            print(f'Validation accuracy improvement ({self.val_acc_max:.2%} --> {val_acc:.2%}).  Saving model ...')
+            print(f'Validation accuracy improvement ({self.best_score*100:.2f} --> {score*100:.2f}).  Saving model ...')
         path = os.path.join(self.save_path, 'best.pth')
         torch.save(model, path)	
-        self.val_acc_max = val_acc
 
-
-def validation(model, test_loader):
+def validation(model, loss_function, dataloader, regression):
     
     device = torch.device('cuda' if torch.cuda.is_available else 'cpu')
     model = model.to(device)
     
     running_loss = 0
-    correct = 0
-    total = 0
-
     all_pred = torch.tensor([]).to(device)
     all_true = torch.tensor([]).to(device)
-    loss_function = CrossEntropyLoss()
-    
+
     with torch.no_grad():
         
         model.eval()
         
-        for data, label in tqdm(test_loader, desc="Valid", ncols=100, unit_scale=True, colour="red"):
+        for data, label in tqdm(dataloader, desc="Valid", ncols=100, unit_scale=True, colour="red"):
             
-            
-            text = data["text"]
-            audio = data["audio"]
-            vision = data["vision"]
-            
-            outputs = model(text, audio, vision)
-            
+            outputs = model(data["text"], data["audio"], data["vision"])
+            label =  label["r" if regression else "c"]
+
             loss = loss_function(outputs, label)
             running_loss += loss.item()
             
-            predicted = torch.argmax(outputs, axis=1)
-            correct += (predicted == label).sum().item()
-            total += label.size(0)
-            
+            predicted = outputs if regression else torch.argmax(outputs, axis=1)
+
             all_pred = torch.cat((all_pred, predicted), dim=0)
             all_true = torch.cat((all_true, label), dim=0)
             
             torch.cuda.empty_cache()
             
-    loss = running_loss / len(test_loader)
-    acc = correct / total
+    loss = running_loss / len(dataloader)
 
-    return loss, acc, all_pred.cpu(), all_true.cpu()
+    return loss, all_true.cpu(), all_pred.cpu().squeeze()
 
 
-def Train(model, train_loader, valid_loader, lr, eposhs, model_save_to):
+def Train(model, loss_function, train_loader, valid_loader, lr, eposhs, early_stop, model_save_to, regression):
     
     device = torch.device('cuda' if torch.cuda.is_available else 'cpu')
     model = model.to(device)
-    
     optimizer = Adam(model.parameters(), lr=lr)
-    loss_function = CrossEntropyLoss()
-    early_stopping = EarlyStopping(model_save_to, patience=100)
-    scheduler = ReduceLROnPlateau(optimizer, mode='max',factor=0.1 ,patience=50)
+    early_stopping = EarlyStopping(model_save_to, patience=early_stop)
     
     history = {}
     history["train loss"] = []
-    history["train acc"] = [] 
+    history["train em"] = [] 
     history["valid loss"] = []
-    history["valid acc"] = []
+    history["valid em"] = []
 
     for epoch in range(eposhs):
         
         model.train()
         running_loss = 0.0
-        correct = 0
-        total = 0
+        true = torch.tensor([]).to(device)
+        pred = torch.tensor([]).to(device)
         
-        for data, label in tqdm(train_loader, desc=f"Epoch {epoch+1}", ncols=100, unit_scale=True, colour="blue"):
+        for data, label in tqdm(train_loader, desc=f"Epoch {epoch+1}", unit_scale=True, colour="blue"):
            
-            optimizer.zero_grad()
+            optimizer.zero_grad(set_to_none=True)
             
-            text = data["text"]
-            audio = data["audio"]
-            vision = data["vision"]
-            
-            outputs = model(text, audio, vision)    
-            
+            outputs = model(data["text"], data["audio"], data["vision"])
+            label =  label["r" if regression else "c"]    
             loss = loss_function(outputs, label)
             
+            predicted = outputs if regression else torch.argmax(outputs, axis=1)
+            true = torch.cat((true, label), dim=0)
+            pred = torch.cat((pred, predicted), dim=0)
+            
+
             running_loss += loss.item()
             
             loss.backward()
             optimizer.step()
-            
-            predicted = torch.argmax(outputs, axis=1)
-            correct += (predicted == label).sum().item()
-                        
-            total += label.size(0)
-            
             torch.cuda.empty_cache()
-            
+        
+        true = true.detach().cpu()
+        pred = pred.detach().cpu().squeeze()
         train_loss = running_loss / len(train_loader)
-        train_acc = correct / total
+        train_em = np.corrcoef(pred, true)[0][1] if regression else accuracy_score(true, pred)
+        valid_loss, true, pred = validation(model, loss_function, valid_loader, regression)
+        valid_em = np.corrcoef(pred, true)[0][1] if regression else accuracy_score(true, pred)
 
-        val_loss, val_acc, _, _ = validation(model, valid_loader)
-        scheduler.step(val_acc)
-        print(f"Train Loss: {train_loss:.6f}\tTrain Acc: {train_acc:.2%}\tVal Loss: {val_loss:.6f}\tVal Acc: {val_acc:.2%}\tLR: {optimizer.state_dict()['param_groups'][0]['lr']}")
+
+        print(f"Train Loss: {train_loss:.4f}\t" \
+              f"Train EM: {train_em*100:.2f}\t\t" \
+              f"Valid Loss: {valid_loss:.4f}\t" \
+              f"Valid EM: {valid_em*100:.2f}\t" \
+              )
                 
         history["train loss"].append(train_loss)
-        history["train acc"].append(train_acc)
-        history["valid loss"].append(val_loss)
-        history["valid acc"].append(val_acc)
-        
-        early_stopping(val_acc, model)
-        if early_stopping.early_stop: break
-    
+        history["train em"].append(train_em)
+        history["valid loss"].append(valid_loss)
+        history["valid em"].append(valid_em)
+
+        early_stopping(valid_em, model)
+        if early_stopping.early_stop: 
+            break
+
     return model, history
 
-def visualization(history, pred, true):
+def visualization(history, true, pred, regression):
     
     print("="*100)
-    acc = accuracy_score(true, pred)
-    f1 = f1_score(true, pred, average='weighted')
-    print(f"Accuracy: {acc:.2%}")
-    print(f"F1 Score: {f1:.2%}")
-    
-    target_names = ["Negative", "Neutral", "Positive"]
-    print (classification_report(true, pred, target_names=target_names))
+    if regression:
+        mae = mean_absolute_error(true, pred)
+        corr = np.corrcoef(pred, true)[0][1]
+        print(f"MAE: {mae*100:.2f}")
+        print(f"CORR: {corr*100:.2f}")
+
+    else:
+        acc = accuracy_score(true, pred)
+        f1 = f1_score(true, pred, average='weighted')
+        print(f"Accuracy: {acc:.2%}")
+        print(f"F1 Score: {f1:.2%}")
+        
+        target_names = ["Negative", "Neutral", "Positive"]
+        print (classification_report(true, pred, target_names=target_names))
 
     plt.figure()
     plt.plot(history["train loss"])
@@ -377,30 +380,19 @@ def visualization(history, pred, true):
     plt.legend(["Train", "Valid"])
     plt.xlabel("Epochs")
     plt.ylabel("Loss")
-    plt.title(f"Learning Curve Loss ({acc:.2%})")
+    plt.title(f"Learning Curve Loss")
     plt.grid(True)
     plt.tight_layout()
     plt.savefig(f"learning_curves_loss")
 
     plt.figure()
-    plt.plot(history["train acc"])
-    plt.plot(history["valid acc"])
+    plt.plot(history["train em"])
+    plt.plot(history["valid em"])
     plt.legend(["Train", "Valid"])
     plt.xlabel("Epochs")
-    plt.ylabel("Accuracy")
-    plt.title(f"Learning Curve Accuracy ({acc:.2%})")
+    plt.ylabel("Evaluation Matrix")
+    plt.title(f"Learning Curve Evaluation Matrix")
     plt.grid(True)
     plt.tight_layout()
     plt.show()
-    plt.savefig(f"learning_curves_accuracy")
-
-    cf_matrix = confusion_matrix(true, pred)
-    df_cm = pd.DataFrame(cf_matrix, target_names, target_names)
-    plt.figure(figsize = (9,6))
-    heatmap(df_cm, annot=True, fmt="d")
-    plt.xlabel("Prediction")
-    plt.ylabel("Label")
-    plt.title(f"Confusion Matrix ({acc:.2%})")
-    plt.tight_layout()
-    plt.show()
-    plt.savefig(f"confusion_matrix")
+    plt.savefig(f"learning_curves_em")
