@@ -32,6 +32,10 @@ def parse_args():
         type=str, 
         default="./",
     )
+    parser.add_argument(
+        "--regression", 
+        action="store_true", 
+    )
     args = parser.parse_args()
     
     return args
@@ -41,17 +45,15 @@ def main():
     torch.cuda.empty_cache()
     args = parse_args()
 
-    if args.processed_data:
-        data = torch.load(args.processed_data)
-    else:
-        format_CH_SIMS()
-        data = extracted_features(
-            data_path="formatted", 
-            text_model="bert-base-chinese",
-            audio_model="MIT/ast-finetuned-audioset-10-10-0.4593",
-            vision_model="microsoft/xclip-base-patch32",
-            data_save_to="processed_data.pt"
-            )
+    data = torch.load(args.processed_data) if args.processed_data else extracted_features(
+        text_model="bert-base-chinese",
+        audio_model="MIT/ast-finetuned-audioset-10-10-0.4593",
+        vision_model="microsoft/xclip-base-patch32",
+        data_save_to="processed_data.pt"
+    )
+
+    num_classes = 1 if args.regression else max(data["train"]["label_c"])+1
+    loss_function = torch.nn.MSELoss() if args.regression else torch.nn.CrossEntropyLoss()
 
     train_loader, valid_loader, test_loader = split_data(data=data, batch_size=args.batch_size)
 
@@ -59,16 +61,14 @@ def main():
         t_in=data["train"]["text"][0].shape, 
         a_in=data["train"]["audio"][0].shape, 
         v_in=data["train"]["vision"][0].shape, 
-        num_classes=max(data["train"]["label"])+1,
+        num_classes=num_classes,
         )
     
-    model, history = Train(model, train_loader, valid_loader, args.lr, args.eposhs, args.model_save_to)
+    model, history = Train(model, loss_function, train_loader, valid_loader, args.lr, args.eposhs, args.model_save_to, args.regression)
 
     model = torch.load(f"{args.model_save_to}/best.pth")
-
-    _, _, pred, true = validation(model, test_loader)
-
-    visualization(history, pred, true)
+    _, true, pred = validation(model, loss_function, test_loader, args.regression)
+    visualization(history, true, pred, args.regression)
 
 if __name__ == "__main__":
     main()
