@@ -28,6 +28,11 @@ def parse_args():
         default=1,
     )
     parser.add_argument(
+        "--early_stop", 
+        type=int, 
+        default=100,
+    )
+    parser.add_argument(
         "--model_save_to", 
         type=str, 
         default="./",
@@ -64,7 +69,17 @@ def main():
         num_classes=num_classes,
         )
     
-    model, history = Train(model, loss_function, train_loader, valid_loader, args.lr, args.eposhs, args.model_save_to, args.regression)
+    model, history = Train(
+        model, 
+        loss_function, 
+        train_loader, 
+        valid_loader, 
+        args.lr, 
+        args.eposhs, 
+        args.early_stop,
+        args.model_save_to, 
+        args.regression
+        )
 
     model = torch.load(f"{args.model_save_to}/best.pth")
     _, true, pred = validation(model, loss_function, test_loader, args.regression)
