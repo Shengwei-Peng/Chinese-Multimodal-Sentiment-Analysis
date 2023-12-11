@@ -44,7 +44,7 @@ python3 main.py \
 | mtfn |81.09 |68.80 |40.31 |81.01 |39.54 |66.58 | Unaligned |
 | mlmf |79.34 |68.36 |41.05 |79.07 |40.91 |63.90 | Unaligned |
 | self_mm |80.04 |65.47 |41.53 |80.44 |42.50 |59.52 | Unaligned |
-|**Ours** | | | | | | | |
+|**Ours** | | | | | 59.65 | 16.52 | Unaligne |
 
 - Classification
 
