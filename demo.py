@@ -3,6 +3,7 @@ import torch
 import whisper
 import librosa
 import numpy as np
+import gradio as gr
 from argparse import ArgumentParser
 from transformers import AutoTokenizer, AutoProcessor, AutoModel, AutoFeatureExtractor
 
@@ -79,10 +80,11 @@ class MSA():
             output = self.model(text, audio, vision)
         pred = torch.argmax(output, axis=1).cpu().numpy()[0]
 
-        return label[pred]
+        return inp, label[pred]
 
 if __name__ == "__main__":
 
+    
     model = MSA("fusion_model.pth")
-    output = model.predict("demo.mp4")
-    print(output)
+    inputs = gr.Video(include_audio = True)
+    gr.Interface(fn=model.predict, inputs=inputs, outputs=[gr.Video(),"text"],examples=[["test.mp4"]]).launch(share=True)
