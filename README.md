@@ -72,3 +72,6 @@ We welcome contributions to the Chinese-Multimodal-Sentiment-Analysis repository
 ## Acknowledgments
 
 This repository builds upon the work and findings of various research papers and datasets, including the CH-SIMS dataset and associated research. We thank all the contributors and researchers in the field for their valuable insights and contributions.
+
+## Demo dataset
+You can find demo vedio [here](<https://drive.google.com/drive/folders/1fpGqRNsmAevGITPDzHDAtmbS6tpJotxh?usp=sharing).
