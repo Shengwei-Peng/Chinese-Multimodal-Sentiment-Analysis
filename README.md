@@ -21,9 +21,50 @@ pip install -r requirements.txt
 ## Usage
 
 ```python
-python3 main.py
+python3 main.py \
+  --batch_size 64 \
+  --lr 5e-5 \
+  --eposhs 100 \
+  --early_stop 20 \
+  --model_save_to ./model \
+  --regression
 ```
 
+## CH-SIMS Result
+
+- Regression
+
+| Model |Mult_acc_2 |Mult_acc_3 |Mult_acc_5 |F1_score |MAE |Corr | Data Setting |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| ef_lstm |69.37 |54.27 |21.23 |56.82 |59.07 |5.45 | Unaligned |
+| lf_dnn |77.02 |64.33 |39.74 |77.27 |44.63 |55.51 | Unaligned |
+| tfn |78.38 |65.12 |39.3 |78.62 |43.22 |59.1 | Unaligned |
+| lmf |77.77 |64.68 |40.53 |77.88 |44.12 |57.59 | Unaligned |
+| mfn |77.9 |65.73 |39.47 |77.88 |43.49 |58.24 | Unaligned |
+| graph_mfn |78.77 |65.65 |39.82 |78.21 |44.5 |57.84 | Unaligned |
+| mult |78.56 |64.77 |37.94 |79.66 |45.32 |56.41 | Unaligned |
+| mlf_dnn |80.44 |69.37 |40.22 |80.28 |39.58 |66.52 | Unaligned |
+| mtfn |81.09 |68.80 |40.31 |81.01 |39.54 |66.58 | Unaligned |
+| mlmf |79.34 |68.36 |41.05 |79.07 |40.91 |63.90 | Unaligned |
+| self_mm |80.04 |65.47 |41.53 |80.44 |42.50 |59.52 | Unaligned |
+|**Ours** | | | | | 59.65 | 16.52 | Unaligned |
+
+- Classification
+
+| Model |Has0_acc_2 |Has0_F1_score |Non0_acc_2 |Non0_F1_score |Acc_3 |F1_score_3 |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| ef_lstm |69.37 |56.82 |63.92 |49.85 |54.27 |38.18 |
+| lf_dnn |79.87 |79.97 |56.70 |55.27 |70.20 |65.29 |
+| tfn |75.32 |75.66 |53.56 |52.79 |65.95 |62.04 |
+| lmf |77.99 |77.59 |57.06 |53.83|66.87 |62.46 |
+| mfn |78.25 |78.08 |56.96 |54.14 |67.57 |
+| graph_mfn |79.21 |78.92 |57.99 |54.66 |68.44 |63.44 |
+| mult |78.07 |78.07 |56.34 |54.26 |68.27 |64.23 |
+| misa |78.07 |77.70 |57.27 |53.99 |67.05 |60.98 |
+| mlf_dnn |80.79 |80.59 |58.19 |55.55 |70.37 |65.94 |
+| mtfn |81.23 |81.24 |56.91 |55.29 |70.28 |66.44 |
+| mlmf |81.45 |81.62 |56.60 |55.66 |71.60 |70.45 |
+|**Ours** |  |  |  |  |**72.87** |**71.03** |
 ## Contributing
 
 We welcome contributions to the Chinese-Multimodal-Sentiment-Analysis repository. If you have suggestions, bug reports, or want to contribute code or documentation, please submit a pull request or open an issue.
