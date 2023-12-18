@@ -1,5 +1,7 @@
 # Chinese-Multimodal-Sentiment-Analysis
 
+![Project Diagram](diagram.png)
+
 ## Introduction
 
 Chinese-Multimodal-Sentiment-Analysis is a comprehensive repository dedicated to advancing the field of sentiment analysis using multimodal data inputs, focusing on Chinese language data. This repository houses code, datasets, and models that integrate and analyze textual, audio, and visual information to understand and predict sentiments in Chinese multimedia content.
