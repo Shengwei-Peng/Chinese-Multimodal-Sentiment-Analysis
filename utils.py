@@ -257,8 +257,7 @@ class EarlyStopping:
         '''Saves model when validation loss decrease.'''
         if self.verbose:
             print(f'Validation accuracy improvement ({self.best_score*100:.2f} --> {score*100:.2f}).  Saving model ...')
-        path = os.path.join(self.save_path, 'best.pth')
-        torch.save(model, path)	
+        torch.save(model, self.save_path)	
 
 def validation(model, loss_function, dataloader, regression):
     
