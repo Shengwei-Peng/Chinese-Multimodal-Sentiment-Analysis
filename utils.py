@@ -18,14 +18,14 @@ from moviepy.editor import AudioFileClip, VideoFileClip
 from transformers import AutoTokenizer, AutoProcessor, AutoModel
 from sklearn.metrics import confusion_matrix, classification_report, accuracy_score, f1_score, mean_absolute_error, matthews_corrcoef
 
-def format_CH_SIMS():
+def format_CH_SIMS(format_path: str):
 
     raw_label = pd.read_csv('./CH-SIMS/label.csv', names=['video','id','text','M','T','A','V','label','mode'])
     
     for mode in ["train", "valid", "test"]:
     
         labels = []
-        path = f"./formatted/{mode}"
+        path = f"{format_path}/{mode}"
         label = raw_label[raw_label['mode']==mode]
         os.makedirs(path, exist_ok=True)
 
@@ -121,13 +121,14 @@ def Vision(path, imageprocessor, model):
 
 
 def extracted_features(
+        format_path: str,
         text_model: str=None,
         audio_model: str=None,
         vision_model: str=None,
         data_save_to: str=None,
         ) -> dict():
 
-    format_CH_SIMS()
+    format_CH_SIMS(format_path)
     device = torch.device('cuda' if torch.cuda.is_available else 'cpu')
     encoder = {"Negative":0, "Neutral":1, "Positive":2}
     data = {}
@@ -142,15 +143,15 @@ def extracted_features(
         processor_vision = AutoProcessor.from_pretrained(vision_model)
         model_vision = AutoModel.from_pretrained(vision_model).to(device)
     
-    for mode in os.listdir("./formatted"):
+    for mode in os.listdir(format_path):
 
         data[mode] = {}
-        with open(f"./formatted/{mode}/label.json", "r", encoding="utf-8") as file:
+        with open(f"{format_path}/{mode}/label.json", "r", encoding="utf-8") as file:
             label = json.load(file)
         first = True
         
         for i in tqdm(range(len(label)), desc=f"{mode}", unit_scale=True, colour="green"):
-            path = f"./formatted/{mode}/{label[i]['id']}"
+            path = f"{format_path}/{mode}/{label[i]['id']}"
 
             if first :
                 first = False
@@ -280,7 +281,7 @@ def validation(model, loss_function, dataloader, regression):
             loss = loss_function(outputs, label)
             running_loss += loss.item()
             
-            predicted = outputs if regression else torch.argmax(outputs, axis=1)
+            predicted = outputs if regression else c
 
             all_pred = torch.cat((all_pred, predicted), dim=0)
             all_true = torch.cat((all_true, label), dim=0)
