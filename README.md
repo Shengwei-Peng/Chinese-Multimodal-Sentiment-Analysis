@@ -119,6 +119,16 @@ python demo.py --fusion_model ./fusion_model.pth
 
 We welcome contributions to the Chinese-Multimodal-Sentiment-Analysis repository. If you have suggestions, bug reports, or want to contribute code or documentation, please submit a pull request or open an issue.
 
+## License
+
+This project is released under the Apache License Version 2.0.
+
+Apache License 2.0 is a permissive open source license that allows for great freedom in using the software. It is widely used in many open source projects and allows for both commercial and non-commercial use of the software.
+
+You can find a copy of the license at [Apache License Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
+
+Please review the license terms to understand what you can and cannot do with the source code and the documentation.
+
 ## Acknowledgments
 
 This repository builds upon the work and findings of various research papers and datasets, including the CH-SIMS dataset and associated research. We thank all the contributors and researchers in the field for their valuable insights and contributions.
