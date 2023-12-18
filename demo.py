@@ -7,9 +7,23 @@ import gradio as gr
 from argparse import ArgumentParser
 from transformers import AutoTokenizer, AutoProcessor, AutoModel, AutoFeatureExtractor
 
+
 import warnings
 warnings.filterwarnings('ignore')
 
+
+def parse_args():
+
+    parser = ArgumentParser()
+    parser.add_argument(
+        "--fusion_model", 
+        type=str,
+        required=True,
+        help="Specify the fusion model to be used for sentiment analysis."
+    )
+    args = parser.parse_args()
+    
+    return args
 
 class MSA():
     def __init__(self, path:str):
@@ -84,7 +98,7 @@ class MSA():
 
 if __name__ == "__main__":
 
-    
-    model = MSA("fusion_model.pth")
+    args = parse_args()
+    model = MSA(args.fusion_model)
     inputs = gr.Video(include_audio = True)
     gr.Interface(fn=model.predict, inputs=inputs, outputs=[gr.Video(),"text"]).launch(share=True)
