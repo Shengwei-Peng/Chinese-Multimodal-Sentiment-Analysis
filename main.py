@@ -82,7 +82,7 @@ def main():
         args.regression
         )
 
-    model = torch.load(args.model_save_to")
+    model = torch.load(args.model_save_to)
     _, true, pred = validation(model, loss_function, test_loader, args.regression)
     visualization(history, true, pred, args.regression)
 
