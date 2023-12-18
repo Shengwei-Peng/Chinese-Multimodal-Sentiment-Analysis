@@ -24,12 +24,39 @@ pip install -r requirements.txt
 
 The Chinese Multimodal Sentiment Analysis project utilizes the CH-SIMS dataset, a comprehensive collection for Chinese sentiment analysis using multimodal data.
 
+#### Overview
+
+CH-SIMS is a richly annotated dataset that includes a variety of video clips with corresponding textual transcriptions and audio data. It is specifically designed for the analysis of sentiment in the Chinese language using a multimodal approach, integrating text, audio, and visual information.
+
+#### Features
+
+- **Multimodal Annotations**: Each segment in the dataset is annotated with sentiments based on multimodal information, providing insights from text, audio, and visual modalities.
+- **Diverse Sources**: The dataset includes video segments from movies, TV series, and other multimedia sources, ensuring a diverse range of expressions and contexts.
+- **Fine-Grained Analysis**: CH-SIMS supports fine-grained sentiment analysis, allowing for a detailed understanding of emotional states and nuances in Chinese language content.
+
+#### Usage
+
+To use the CH-SIMS dataset in this project:
+
+**Download**: The dataset can be accessed from [CH-SIMS repository](https://github.com/thuiar/MMSA) or a similar source.
+
+#### Important Considerations
+
+- Ensure compliance with the dataset's licensing and usage terms.
+- Properly handle the multimodal aspects of the data for effective sentiment analysis.
+- Consider using additional data augmentation techniques to enhance the model's robustness and generalizability.
+
+The use of the CH-SIMS dataset in this project allows for an in-depth exploration and analysis of sentiment in the Chinese context, leveraging the strengths of multimodal data to achieve more accurate and nuanced sentiment analysis results.
 
 ## Model
 
-### Training Adaptor Models for Feature Fusion
+### Adapter Models for Multimodal Feature Fusion
 
-The project employs adaptor models to effectively fuse features from different modalities (text, audio, and video). These models are crucial for integrating and analyzing the multimodal data to perform sentiment analysis.
+The Chinese-Multimodal-Sentiment-Analysis project leverages advanced adapter models to effectively combine and analyze features from different modalities, including text, audio, and video. These models play a pivotal role in the comprehensive sentiment analysis process, ensuring that all aspects of the data are utilized optimally.
+
+#### Training the Adapter Models
+
+To train the dapter models with your dataset, follow the command below. This command will initiate the training process, taking into consideration the multimodal nature of the dataset and applying appropriate feature fusion techniques.
 
 To train the adaptor models, use the following command:
 ```python
@@ -40,6 +67,12 @@ python main.py \
   --early_stop 20 \
   --model_save_to ./fusion_model.pth 
 ```
+#### Command Line Arguments:
+- `--batch_size`: Size of each training batch.
+- `--lr`: Learning rate for the training process.
+- `--epochs`: Number of epochs for model training.
+- `--early_stop`: Early stopping criteria to prevent overfitting.
+- `--model_save_to`: Path where the trained model will be saved.
 
 ## Usage
 
