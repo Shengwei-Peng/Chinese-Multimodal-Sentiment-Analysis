@@ -35,7 +35,7 @@ def parse_args():
     parser.add_argument(
         "--model_save_to", 
         type=str, 
-        default="./",
+        default="model.pth",
     )
     parser.add_argument(
         "--regression", 
