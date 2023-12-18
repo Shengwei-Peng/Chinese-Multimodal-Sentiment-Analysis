@@ -18,15 +18,34 @@ cd Chinese-Multimodal-Sentiment-Analysis
 pip install -r requirements.txt
 ```
 
-## Usage
+## Dataset
 
+### CH-SIMS Dataset
+
+The Chinese Multimodal Sentiment Analysis project utilizes the CH-SIMS dataset, a comprehensive collection for Chinese sentiment analysis using multimodal data.
+
+
+## Model
+
+### Training Adaptor Models for Feature Fusion
+
+The project employs adaptor models to effectively fuse features from different modalities (text, audio, and video). These models are crucial for integrating and analyzing the multimodal data to perform sentiment analysis.
+
+To train the adaptor models, use the following command:
 ```python
-python3 main.py \
+python main.py \
   --batch_size 64 \
   --lr 5e-5 \
   --eposhs 100 \
   --early_stop 20 \
-  --model_save_to ./model  
+  --model_save_to ./fusion_model.pth 
+```
+
+## Usage
+
+To illustrate, suppose you have a new set of data for sentiment analysis and the trained fusion model saved as `./fusion_model.pth`. You can analyze the sentiment of this data by executing:
+```python
+python demo.py --fusion_model ./fusion_model.pth 
 ```
 
 ## Results
