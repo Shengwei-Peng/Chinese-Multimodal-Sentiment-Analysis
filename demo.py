@@ -87,4 +87,4 @@ if __name__ == "__main__":
     
     model = MSA("fusion_model.pth")
     inputs = gr.Video(include_audio = True)
-    gr.Interface(fn=model.predict, inputs=inputs, outputs=[gr.Video(),"text"],examples=[["test.mp4"]]).launch(share=True)
+    gr.Interface(fn=model.predict, inputs=inputs, outputs=[gr.Video(),"text"]).launch(share=True)
