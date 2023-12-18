@@ -24,6 +24,28 @@ pip install -r requirements.txt
 
 The Chinese Multimodal Sentiment Analysis project utilizes the CH-SIMS dataset, a comprehensive collection for Chinese sentiment analysis using multimodal data.
 
+CH-SIMS dataset uses feature files that are organized as follows:
+
+```python
+{
+    "train": {
+        "raw_text": [],              # raw text
+        "audio": [],                 # audio feature
+        "vision": [],                # video feature
+        "id": [],                    # [video_id$_$clip_id, ..., ...]
+        "text": [],                  # bert feature
+        "text_bert": [],             # word ids for bert
+        "audio_lengths": [],         # audio feature lenth(over time) for every sample
+        "vision_lengths": [],        # same as audio_lengths
+        "annotations": [],           # strings
+        "classification_labels": [], # Negative(0), Neutral(1), Positive(2). Deprecated in v_2.0
+        "regression_labels": []      # Negative(<0), Neutral(0), Positive(>0)
+    },
+    "valid": {***},                  # same as "train"
+    "test": {***},                   # same as "train"
+}
+```
+
 #### Overview
 
 CH-SIMS is a richly annotated dataset that includes a variety of video clips with corresponding textual transcriptions and audio data. It is specifically designed for the analysis of sentiment in the Chinese language using a multimodal approach, integrating text, audio, and visual information.
@@ -85,20 +107,20 @@ python demo.py --fusion_model ./fusion_model.pth
 
 - CH-SIMS
 
-| Model  |Acc_3 |F1_score_3 |
-| :---: | :---: | :---: |
-| ef_lstm  |54.27 |38.18 |
-| lf_dnn |70.20 |65.29 |
-| tfn |65.95 |62.04 |
-| lmf |66.87 |62.46 |
-| mfn |54.14 |67.57 |
-| graph_mfn  |68.44 |63.44 |
-| mult |68.27 |64.23 |
-| misa |67.05 |60.98 |
-| mlf_dnn |70.37 |65.94 |
-| mtfn  |70.28 |66.44 |
-| mlmf  |71.60 |70.45 |
-|**Ours** |**72.87** |**71.03** |
+|    Model   |                                          From                                          | Acc_3     | F1-score_3 |
+| :--------: | :------------------------------------------------------------------------------------: | :-------: | :--------: |
+| EF LSTM    |               [MultimodalDNN](https://github.com/rhoposit/MultimodalDNN)               | 54.27     | 38.18      |
+| LF DNN     |               [MultimodalDNN](https://github.com/rhoposit/MultimodalDNN)               | 70.20     | 65.29      |
+| TFN        |        [Tensor-Fusion-Network](https://github.com/A2Zadeh/TensorFusionNetwork)         | 65.95     | 62.04      |
+| LMF        | [Low-rank-Multimodal-Fusion](https://github.com/Justin1904/Low-rank-Multimodal-Fusion) | 66.87     | 62.46      |
+| MFN        |               [Memory-Fusion-Network](https://github.com/pliang279/MFN)                | 54.14     | 67.57      |
+| Graph MFN  |    [Graph-Memory-Fusion-Network](https://github.com/A2Zadeh/CMU-MultimodalSDK/)        | 68.44     | 63.44      |
+| MulT       |      [Multimodal-Transformer](https://github.com/yaohungt/Multimodal-Transformer)      | 68.27     | 64.23      |
+| MISA       |                      [MISA](https://github.com/declare-lab/MISA)                       | 67.05     | 60.98      |
+| MLF DNN    |                         [MMSA](https://github.com/thuiar/MMSA)                         | 70.37     | 65.94      |
+| MTFN       |                         [MMSA](https://github.com/thuiar/MMSA)                         | 70.28     | 66.44      |
+| MLMF       |                         [MMSA](https://github.com/thuiar/MMSA)                         | 71.60     | 70.45      |
+| **Ours**   |                                                                                        | **72.87** | **71.03**  |
 ## Contributing
 
 We welcome contributions to the Chinese-Multimodal-Sentiment-Analysis repository. If you have suggestions, bug reports, or want to contribute code or documentation, please submit a pull request or open an issue.
