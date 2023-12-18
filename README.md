@@ -26,13 +26,12 @@ python3 main.py \
   --lr 5e-5 \
   --eposhs 100 \
   --early_stop 20 \
-  --model_save_to ./model \
-  --regression
+  --model_save_to ./model  
 ```
 
-## CH-SIMS Result
+## Results
 
-- Classification
+- CH-SIMS
 
 | Model  |Acc_3 |F1_score_3 |
 | :---: | :---: | :---: |
@@ -56,5 +55,3 @@ We welcome contributions to the Chinese-Multimodal-Sentiment-Analysis repository
 
 This repository builds upon the work and findings of various research papers and datasets, including the CH-SIMS dataset and associated research. We thank all the contributors and researchers in the field for their valuable insights and contributions.
 
-## Demo dataset
-You can find demo vedio in the link. https://drive.google.com/drive/folders/1fpGqRNsmAevGITPDzHDAtmbS6tpJotxh?usp=sharing
