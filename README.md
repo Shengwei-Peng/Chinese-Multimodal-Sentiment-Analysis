@@ -56,17 +56,9 @@ CH-SIMS is a richly annotated dataset that includes a variety of video clips wit
 - **Diverse Sources**: The dataset includes video segments from movies, TV series, and other multimedia sources, ensuring a diverse range of expressions and contexts.
 - **Fine-Grained Analysis**: CH-SIMS supports fine-grained sentiment analysis, allowing for a detailed understanding of emotional states and nuances in Chinese language content.
 
-#### Usage
+#### Download
 
-To use the CH-SIMS dataset in this project:
-
-**Download**: The dataset can be accessed from [CH-SIMS repository](https://github.com/thuiar/MMSA) or a similar source.
-
-#### Important Considerations
-
-- Ensure compliance with the dataset's licensing and usage terms.
-- Properly handle the multimodal aspects of the data for effective sentiment analysis.
-- Consider using additional data augmentation techniques to enhance the model's robustness and generalizability.
+The dataset can be accessed from [CH-SIMS repository](https://github.com/thuiar/MMSA) or a similar source.
 
 The use of the CH-SIMS dataset in this project allows for an in-depth exploration and analysis of sentiment in the Chinese context, leveraging the strengths of multimodal data to achieve more accurate and nuanced sentiment analysis results.
 
