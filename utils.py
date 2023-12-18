@@ -237,8 +237,6 @@ class EarlyStopping:
         self.best_score = -1
         self.early_stop = False
 
-        os.makedirs(save_path, exist_ok=True)
-
     def __call__(self, score, model):
 
         if score >= self.best_score:
@@ -280,7 +278,7 @@ def validation(model, loss_function, dataloader, regression):
             loss = loss_function(outputs, label)
             running_loss += loss.item()
             
-            predicted = outputs if regression else c
+            predicted = outputs if regression else torch.argmax(outputs, axis=1)
 
             all_pred = torch.cat((all_pred, predicted), dim=0)
             all_true = torch.cat((all_true, label), dim=0)
