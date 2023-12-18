@@ -1,6 +1,6 @@
 # Chinese-Multimodal-Sentiment-Analysis
 
-![Project Diagram](diagram.png)
+![Project Diagram](system.png)
 
 ## Introduction
 
