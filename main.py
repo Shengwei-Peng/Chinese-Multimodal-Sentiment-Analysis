@@ -1,6 +1,6 @@
 import torch
 from argparse import ArgumentParser
-from utils import format_CH_SIMS, extracted_features, split_data, Train, validation, visualization
+from utils import extracted_features, split_data, Train, validation, visualization
 from model import Feature_Fusion_Network
 
 def parse_args():
@@ -51,6 +51,7 @@ def main():
     args = parse_args()
 
     data = torch.load(args.processed_data) if args.processed_data else extracted_features(
+        format_path="./formatted",
         text_model="bert-base-chinese",
         audio_model="MIT/ast-finetuned-audioset-10-10-0.4593",
         vision_model="microsoft/xclip-base-patch32",
