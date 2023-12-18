@@ -72,7 +72,7 @@ The Chinese-Multimodal-Sentiment-Analysis project leverages advanced adapter mod
 
 #### Training the Adapter Models
 
-To train the dapter models with your dataset, follow the command below. This command will initiate the training process, taking into consideration the multimodal nature of the dataset and applying appropriate feature fusion techniques.
+To train the adapter models with your dataset, follow the command below. This command will initiate the training process, taking into consideration the multimodal nature of the dataset and applying appropriate feature fusion techniques.
 
 To train the adaptor models, use the following command:
 ```python
