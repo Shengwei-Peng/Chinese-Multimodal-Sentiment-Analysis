@@ -69,12 +69,12 @@ class Block(nn.Module):
 
 
 class Feature_Fusion_Network(nn.Module):
-    def __init__(self, t_in, a_in, v_in, num_classes):
+    def __init__(self, t_in, a_in, v_in, num_classes, num_layers=1):
         super().__init__()
         
-        self.textnet = Block(t_in, num_classes, num_layers=2, time=True)
-        self.audionet = Block(a_in, num_classes, num_layers=2, time=True)
-        self.visionnet = Block(v_in, num_classes, num_layers=2, time=False)
+        self.textnet = Block(t_in, num_classes, num_layers=num_layers, time=True)
+        self.audionet = Block(a_in, num_classes, num_layers=num_layers, time=True)
+        self.visionnet = Block(v_in, num_classes, num_layers=num_layers, time=False)
         
     def forward(self, text, audio, vision):
         
